@@ -1,0 +1,1031 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SafeAid AI</title>
+<style>
+  :root{
+    --bg: #0a0a0b;
+    --panel: #17171a;
+    --panel-2: #1f1f23;
+    --border: #2a2a2f;
+    --text: #f2f1f4;
+    --text-dim: #9c9ca3;
+    --accent: #ec4899;
+    --accent-dim: #ec489922;
+    --accent-strong: #f472b6;
+    --low: #34d399;
+    --low-bg: #0f2a20;
+    --medium: #fbbf24;
+    --medium-bg: #2b230a;
+    --high: #f87171;
+    --high-bg: #2b1212;
+    --radius-lg: 20px;
+    --radius-md: 14px;
+    --radius-sm: 10px;
+  }
+
+  *{ box-sizing: border-box; }
+
+  html, body{
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body{
+    min-height: 100vh;
+    min-height: 100dvh;
+  }
+
+  #app{
+    max-width: 480px;
+    margin: 0 auto;
+    min-height: 100vh;
+    min-height: 100dvh;
+    padding: 0 18px 40px;
+    position: relative;
+  }
+
+  /* ---------- Top bar ---------- */
+  .topbar{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 0 8px;
+  }
+
+  .brand{
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+  }
+
+  .brand .mark{
+    width: 10px;
+    height: 10px;
+    border-radius: 3px;
+    background: var(--accent);
+    display: inline-block;
+    transform: rotate(45deg);
+  }
+
+  .brand h1{
+    font-size: 21px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    margin: 0;
+  }
+
+  .icon-btn{
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    background: var(--panel);
+    color: var(--text-dim);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: border-color .15s ease, color .15s ease;
+  }
+  .icon-btn:hover{ border-color: var(--accent); color: var(--text); }
+  .icon-btn:focus-visible{ outline: 2px solid var(--accent); outline-offset: 2px; }
+  .icon-btn svg{ width: 20px; height: 20px; }
+
+  /* ---------- Screens ---------- */
+  .screen{ display: none; }
+  .screen.active{ display: block; }
+
+  .subtitle{
+    color: var(--text-dim);
+    font-size: 14.5px;
+    line-height: 1.5;
+    margin: 0 0 22px;
+  }
+
+  label.field-label{
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-dim);
+    margin: 0 0 8px;
+  }
+
+  .field{ margin-bottom: 18px; }
+
+  textarea#emergencyText{
+    width: 100%;
+    min-height: 120px;
+    resize: vertical;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    color: var(--text);
+    font-size: 15.5px;
+    font-family: inherit;
+    line-height: 1.5;
+    padding: 14px;
+  }
+  textarea#emergencyText::placeholder{ color: #6b6b72; }
+  textarea#emergencyText:focus-visible{ outline: 2px solid var(--accent); outline-offset: 1px; }
+
+  select#language{
+    width: 100%;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    color: var(--text);
+    font-size: 15.5px;
+    font-family: inherit;
+    padding: 14px;
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%239c9ca3' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    padding-right: 40px;
+  }
+  select#language:focus-visible{ outline: 2px solid var(--accent); outline-offset: 1px; }
+
+  .upload-row{
+    display: flex;
+    gap: 12px;
+    align-items: center;
+  }
+
+  .upload-btn{
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: var(--panel);
+    border: 1px dashed var(--border);
+    border-radius: var(--radius-md);
+    color: var(--text-dim);
+    font-size: 14.5px;
+    font-weight: 600;
+    padding: 16px 14px;
+    cursor: pointer;
+    transition: border-color .15s ease, color .15s ease;
+  }
+  .upload-btn:hover{ border-color: var(--accent); color: var(--text); }
+  .upload-btn svg{ width: 18px; height: 18px; flex-shrink: 0; }
+  #imageInput{ display: none; }
+
+  .preview-wrap{
+    margin-top: 12px;
+    position: relative;
+    display: none;
+  }
+  .preview-wrap.show{ display: block; }
+  .preview-wrap img{
+    width: 100%;
+    max-height: 220px;
+    object-fit: cover;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border);
+    display: block;
+  }
+  .preview-remove{
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 32px;
+    height: 32px;
+    border-radius: 10px;
+    background: rgba(10,10,11,0.85);
+    border: 1px solid var(--border);
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+  .preview-remove svg{ width: 16px; height: 16px; }
+
+  .btn{
+    width: 100%;
+    border: none;
+    border-radius: var(--radius-md);
+    font-family: inherit;
+    font-size: 16px;
+    font-weight: 700;
+    padding: 17px 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: transform .08s ease, opacity .15s ease, background .15s ease;
+  }
+  .btn:active{ transform: scale(0.98); }
+  .btn:focus-visible{ outline: 2px solid var(--accent-strong); outline-offset: 2px; }
+
+  .btn-primary{
+    background: var(--accent);
+    color: #1a0510;
+  }
+  .btn-primary:disabled{
+    background: var(--panel-2);
+    color: #5a5a60;
+    cursor: not-allowed;
+  }
+
+  .btn-outline{
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text);
+  }
+  .btn-outline:hover{ border-color: var(--accent); }
+
+  .btn-danger-solid{
+    background: var(--high);
+    color: #2b0a0a;
+  }
+
+  .btn-danger-outline{
+    background: transparent;
+    border: 1.5px solid var(--high);
+    color: var(--high);
+  }
+
+  .btn-row{
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 14px;
+  }
+
+  /* ---------- Loading ---------- */
+  #screen-loading{
+    min-height: 70vh;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+  #screen-loading.active{ display: flex; }
+
+  .spinner{
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    border: 3px solid var(--panel-2);
+    border-top-color: var(--accent);
+    animation: spin 0.85s linear infinite;
+    margin-bottom: 22px;
+  }
+  @keyframes spin{ to{ transform: rotate(360deg); } }
+
+  .loading-text{
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text);
+  }
+  .loading-sub{
+    font-size: 13.5px;
+    color: var(--text-dim);
+    margin-top: 6px;
+  }
+
+  /* ---------- Result screen ---------- */
+  .card{
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 20px;
+    margin-bottom: 16px;
+  }
+
+  .severity-row{
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+  }
+
+  .severity-badge{
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 20px;
+    border-radius: 999px;
+    font-size: 13.5px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    text-transform: capitalize;
+  }
+  .severity-badge .dot{
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+  }
+  .severity-low{ background: var(--low-bg); color: var(--low); }
+  .severity-low .dot{ background: var(--low); }
+  .severity-medium{ background: var(--medium-bg); color: var(--medium); }
+  .severity-medium .dot{ background: var(--medium); }
+  .severity-high{ background: var(--high-bg); color: var(--high); }
+  .severity-high .dot{ background: var(--high); }
+
+  .card h2{
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-dim);
+    margin: 0 0 10px;
+  }
+
+  .card p{
+    font-size: 15px;
+    line-height: 1.6;
+    margin: 0;
+    color: var(--text);
+  }
+
+  ol.steps{
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    counter-reset: step;
+  }
+  ol.steps li{
+    counter-increment: step;
+    display: flex;
+    gap: 12px;
+    padding: 10px 0;
+    font-size: 15px;
+    line-height: 1.5;
+    border-bottom: 1px solid var(--border);
+  }
+  ol.steps li:last-child{ border-bottom: none; padding-bottom: 0; }
+  ol.steps li:first-child{ padding-top: 0; }
+  ol.steps li::before{
+    content: counter(step);
+    flex-shrink: 0;
+    width: 26px;
+    height: 26px;
+    border-radius: 8px;
+    background: var(--accent-dim);
+    color: var(--accent-strong);
+    font-size: 13px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .warn-box{
+    display: flex;
+    gap: 12px;
+    background: var(--medium-bg);
+    border: 1px solid #4a3a10;
+    border-radius: var(--radius-md);
+    padding: 14px;
+    margin-bottom: 12px;
+  }
+  .warn-box svg{
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    color: var(--medium);
+    margin-top: 1px;
+  }
+  .warn-box p{
+    font-size: 14px;
+    line-height: 1.5;
+    color: #f2dfa8;
+  }
+
+  .alert-banner{
+    background: var(--high-bg);
+    border: 1px solid #5a1c1c;
+    border-radius: var(--radius-lg);
+    padding: 18px;
+    margin-bottom: 16px;
+    text-align: center;
+  }
+  .alert-banner .alert-title{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-size: 15.5px;
+    font-weight: 700;
+    color: var(--high);
+    margin-bottom: 4px;
+  }
+  .alert-banner .alert-title svg{ width: 20px; height: 20px; }
+  .alert-banner p{
+    font-size: 13.5px;
+    color: #e8b4b4;
+    margin: 0 0 16px;
+  }
+
+  a.btn{ text-decoration: none; box-sizing: border-box; }
+
+  /* ---------- Contacts ---------- */
+  .contact-row{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .contact-row:last-child{ border-bottom: none; }
+  .contact-info .name{ font-size: 15px; font-weight: 700; }
+  .contact-info .meta{ font-size: 13px; color: var(--text-dim); margin-top: 2px; }
+  .delete-btn{
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  .delete-btn:hover{ border-color: var(--high); color: var(--high); }
+  .delete-btn svg{ width: 16px; height: 16px; }
+
+  .empty-state{
+    text-align: center;
+    padding: 28px 10px;
+    color: var(--text-dim);
+    font-size: 14px;
+  }
+
+  input.text-input{
+    width: 100%;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    color: var(--text);
+    font-size: 15.5px;
+    font-family: inherit;
+    padding: 14px;
+  }
+  input.text-input:focus-visible{ outline: 2px solid var(--accent); outline-offset: 1px; }
+  input.text-input::placeholder{ color: #6b6b72; }
+
+  .back-row{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 20px 0 6px;
+  }
+  .back-row button{
+    background: none;
+    border: none;
+    color: var(--text-dim);
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    padding: 6px;
+    margin-left: -6px;
+  }
+  .back-row button svg{ width: 22px; height: 22px; }
+  .back-row h2{ font-size: 18px; font-weight: 700; margin: 0; }
+
+  /* ---------- Toast ---------- */
+  #toast{
+    position: fixed;
+    left: 18px;
+    right: 18px;
+    bottom: 22px;
+    max-width: 444px;
+    margin: 0 auto;
+    background: #241417;
+    border: 1px solid var(--high);
+    color: #ffd9d9;
+    padding: 14px 16px;
+    border-radius: var(--radius-md);
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transform: translateY(120%);
+    opacity: 0;
+    transition: transform .25s ease, opacity .25s ease;
+    z-index: 100;
+  }
+  #toast.show{ transform: translateY(0); opacity: 1; }
+  #toast svg{ width: 18px; height: 18px; flex-shrink: 0; }
+
+  .section-gap{ height: 6px; }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- ============ HOME SCREEN ============ -->
+  <section id="screen-home" class="screen active">
+    <div class="topbar">
+      <div class="brand">
+        <span class="mark"></span>
+        <h1>SafeAid AI</h1>
+      </div>
+      <button class="icon-btn" id="openContacts" aria-label="Emergency contacts settings">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+      </button>
+    </div>
+
+    <p class="subtitle">Describe what's happening or add a photo. SafeAid will assess the situation and walk you through first aid steps.</p>
+
+    <div class="field">
+      <label class="field-label" for="emergencyText">What's happening?</label>
+      <textarea id="emergencyText" placeholder="Describe the emergency..."></textarea>
+    </div>
+
+    <div class="field">
+      <label class="field-label">Photo (optional)</label>
+      <div class="upload-row">
+        <label class="upload-btn" for="imageInput">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+          <span>Take or choose photo</span>
+        </label>
+        <input type="file" id="imageInput" accept="image/*" capture="environment">
+      </div>
+      <div class="preview-wrap" id="previewWrap">
+        <img id="previewImg" alt="Selected photo preview">
+        <button class="preview-remove" id="removeImage" aria-label="Remove photo">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="field">
+      <label class="field-label" for="language">Language</label>
+      <select id="language">
+        <option value="English">English</option>
+        <option value="Hindi">Hindi</option>
+        <option value="Marathi">Marathi</option>
+        <option value="Tamil">Tamil</option>
+        <option value="Bengali">Bengali</option>
+      </select>
+    </div>
+
+    <button class="btn btn-primary" id="analyzeBtn" disabled>Analyze</button>
+  </section>
+
+  <!-- ============ LOADING SCREEN ============ -->
+  <section id="screen-loading" class="screen">
+    <div class="spinner"></div>
+    <div class="loading-text">Analyzing situation...</div>
+    <div class="loading-sub">This will just take a moment</div>
+  </section>
+
+  <!-- ============ RESULT SCREEN ============ -->
+  <section id="screen-result" class="screen">
+    <div class="topbar">
+      <div class="brand">
+        <span class="mark"></span>
+        <h1>SafeAid AI</h1>
+      </div>
+    </div>
+
+    <div class="severity-row">
+      <span class="severity-badge" id="severityBadge">
+        <span class="dot"></span>
+        <span id="severityText">low</span>
+      </span>
+    </div>
+
+    <div class="alert-banner" id="highAlertBanner" style="display:none;">
+      <div class="alert-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+        Recommend calling emergency services
+      </div>
+      <p id="helplineText">Call for professional help immediately</p>
+      <div class="btn-row" style="margin-top:0;">
+        <a class="btn btn-danger-solid" href="tel:108" id="callBtn">Call 108</a>
+        <button class="btn btn-danger-outline" id="alertContactBtn">Alert Emergency Contact</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Situation Summary</h2>
+      <p id="situationSummary">—</p>
+    </div>
+
+    <div class="card">
+      <h2>First Aid Steps</h2>
+      <ol class="steps" id="stepsList"></ol>
+    </div>
+
+    <div class="warn-box">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+      <p id="warningEn">—</p>
+    </div>
+
+    <div class="warn-box">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+      <p id="warningLocal">—</p>
+    </div>
+
+    <button class="btn btn-outline" id="analyzeAnotherBtn" style="margin-top:8px;">Analyze Another</button>
+  </section>
+
+  <!-- ============ CONTACTS SCREEN ============ -->
+  <section id="screen-contacts" class="screen">
+    <div class="back-row">
+      <button id="closeContacts" aria-label="Back">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+      </button>
+      <h2>Emergency Contacts</h2>
+    </div>
+    <p class="subtitle">Save people who should be alerted if you're in a high-severity situation.</p>
+
+    <div class="field">
+      <label class="field-label" for="contactName">Name</label>
+      <input class="text-input" id="contactName" type="text" placeholder="e.g. Priya Sharma">
+    </div>
+    <div class="field">
+      <label class="field-label" for="contactPhone">Phone</label>
+      <input class="text-input" id="contactPhone" type="tel" placeholder="e.g. +91 98765 43210">
+    </div>
+    <div class="field">
+      <label class="field-label" for="contactRelation">Relation</label>
+      <input class="text-input" id="contactRelation" type="text" placeholder="e.g. Sister, Neighbor, Doctor">
+    </div>
+
+    <button class="btn btn-primary" id="saveContactBtn">Save Contact</button>
+
+    <div class="card" style="margin-top:22px;">
+      <h2>Saved Contacts</h2>
+      <div id="contactsList">
+        <div class="empty-state">No contacts saved yet.</div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<div id="toast" role="alert" aria-live="assertive">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+  <span id="toastMsg">Something went wrong. Please try again.</span>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  // ---------- State ----------
+  var state = {
+    imageBase64: null,
+    lastResult: null,
+    lastIncidentId: null,
+    contacts: []
+  };
+
+  // ---------- Element refs ----------
+  var screens = {
+    home: document.getElementById('screen-home'),
+    loading: document.getElementById('screen-loading'),
+    result: document.getElementById('screen-result'),
+    contacts: document.getElementById('screen-contacts')
+  };
+
+  var emergencyText = document.getElementById('emergencyText');
+  var imageInput = document.getElementById('imageInput');
+  var previewWrap = document.getElementById('previewWrap');
+  var previewImg = document.getElementById('previewImg');
+  var removeImageBtn = document.getElementById('removeImage');
+  var languageSelect = document.getElementById('language');
+  var analyzeBtn = document.getElementById('analyzeBtn');
+
+  var openContactsBtn = document.getElementById('openContacts');
+  var closeContactsBtn = document.getElementById('closeContacts');
+
+  var severityBadge = document.getElementById('severityBadge');
+  var severityText = document.getElementById('severityText');
+  var situationSummary = document.getElementById('situationSummary');
+  var stepsList = document.getElementById('stepsList');
+  var warningEn = document.getElementById('warningEn');
+  var warningLocal = document.getElementById('warningLocal');
+  var highAlertBanner = document.getElementById('highAlertBanner');
+  var helplineText = document.getElementById('helplineText');
+  var callBtn = document.getElementById('callBtn');
+  var alertContactBtn = document.getElementById('alertContactBtn');
+  var analyzeAnotherBtn = document.getElementById('analyzeAnotherBtn');
+
+  var contactName = document.getElementById('contactName');
+  var contactPhone = document.getElementById('contactPhone');
+  var contactRelation = document.getElementById('contactRelation');
+  var saveContactBtn = document.getElementById('saveContactBtn');
+  var contactsList = document.getElementById('contactsList');
+
+  var toast = document.getElementById('toast');
+  var toastMsg = document.getElementById('toastMsg');
+  var toastTimer = null;
+
+  // ---------- Screen navigation ----------
+  function showScreen(name){
+    Object.keys(screens).forEach(function(key){
+      screens[key].classList.toggle('active', key === name);
+    });
+  }
+
+  // ---------- Toast ----------
+  function showToast(message){
+    toastMsg.textContent = message || 'Something went wrong. Please try again.';
+    toast.classList.add('show');
+    if(toastTimer) clearTimeout(toastTimer);
+    toastTimer = setTimeout(function(){
+      toast.classList.remove('show');
+    }, 3600);
+  }
+
+  // ---------- Home: enable/disable analyze ----------
+  function refreshAnalyzeState(){
+    var hasText = emergencyText.value.trim().length > 0;
+    var hasImage = !!state.imageBase64;
+    analyzeBtn.disabled = !(hasText || hasImage);
+  }
+  emergencyText.addEventListener('input', refreshAnalyzeState);
+
+  // ---------- Image handling ----------
+  imageInput.addEventListener('change', function(){
+    var file = imageInput.files && imageInput.files[0];
+    if(!file) return;
+    var reader = new FileReader();
+    reader.onload = function(e){
+      state.imageBase64 = e.target.result; // data URL (base64)
+      previewImg.src = e.target.result;
+      previewWrap.classList.add('show');
+      refreshAnalyzeState();
+    };
+    reader.onerror = function(){
+      showToast('Could not read that image. Please try another.');
+    };
+    reader.readAsDataURL(file);
+  });
+
+  removeImageBtn.addEventListener('click', function(){
+    state.imageBase64 = null;
+    imageInput.value = '';
+    previewImg.src = '';
+    previewWrap.classList.remove('show');
+    refreshAnalyzeState();
+  });
+
+  // ---------- Analyze ----------
+  analyzeBtn.addEventListener('click', function(){
+    if(analyzeBtn.disabled) return;
+
+    var payload = {
+      text: emergencyText.value.trim(),
+      imageBase64: state.imageBase64 || null,
+      language: languageSelect.value
+    };
+
+    showScreen('loading');
+
+    fetch('/api/analyze', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    })
+    .then(function(res){
+      if(!res.ok) throw new Error('Analyze request failed');
+      return res.json();
+    })
+    .then(function(data){
+      state.lastResult = data;
+      state.lastIncidentId = data.incidentId || data.incident_id || null;
+      renderResult(data);
+      showScreen('result');
+    })
+    .catch(function(err){
+      showScreen('home');
+      showToast('Could not analyze the situation. Check your connection and try again.');
+    });
+  });
+
+  // ---------- Render result ----------
+  function renderResult(data){
+    var severity = (data.severity || 'low').toLowerCase();
+    severityText.textContent = severity;
+    severityBadge.className = 'severity-badge severity-' + (['low','medium','high'].indexOf(severity) !== -1 ? severity : 'low');
+
+    situationSummary.textContent = data.situation_summary || 'No summary available.';
+
+    stepsList.innerHTML = '';
+    var steps = data.first_aid_steps || [];
+    if(steps.length === 0){
+      var li = document.createElement('li');
+      li.textContent = 'No steps provided.';
+      stepsList.appendChild(li);
+    } else {
+      steps.forEach(function(step){
+        var li = document.createElement('li');
+        li.textContent = step;
+        stepsList.appendChild(li);
+      });
+    }
+
+    warningEn.textContent = data.warning_message || 'Seek professional medical attention if symptoms worsen.';
+    warningLocal.textContent = data.translated_warning || data.warning_message || '';
+
+    var shouldCall = severity === 'high' || data.call_emergency_services === true;
+    highAlertBanner.style.display = shouldCall ? 'block' : 'none';
+
+    var helpline = data.recommended_helpline || '108';
+    helplineText.textContent = 'Call ' + helpline + ' for professional help immediately';
+    callBtn.textContent = 'Call ' + helpline;
+    callBtn.setAttribute('href', 'tel:' + String(helpline).replace(/[^0-9+]/g, ''));
+  }
+
+  analyzeAnotherBtn.addEventListener('click', function(){
+    emergencyText.value = '';
+    state.imageBase64 = null;
+    imageInput.value = '';
+    previewImg.src = '';
+    previewWrap.classList.remove('show');
+    refreshAnalyzeState();
+    showScreen('home');
+  });
+
+  // ---------- Alert emergency contact ----------
+  alertContactBtn.addEventListener('click', function(){
+    if(!state.contacts || state.contacts.length === 0){
+      showToast('No emergency contact saved yet. Add one in settings.');
+      return;
+    }
+
+    var contact = state.contacts[0];
+    var originalText = alertContactBtn.textContent;
+    alertContactBtn.disabled = true;
+    alertContactBtn.textContent = 'Alerting...';
+
+    function sendAlert(location){
+      fetch('/api/alert', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contactId: contact.id,
+          incidentId: state.lastIncidentId,
+          location: location
+        })
+      })
+      .then(function(res){
+        if(!res.ok) throw new Error('Alert request failed');
+        return res.json();
+      })
+      .then(function(){
+        showToast('Emergency contact alerted.');
+      })
+      .catch(function(){
+        showToast('Could not alert your contact. Please try calling them directly.');
+      })
+      .finally(function(){
+        alertContactBtn.disabled = false;
+        alertContactBtn.textContent = originalText;
+      });
+    }
+
+    if(navigator.geolocation){
+      navigator.geolocation.getCurrentPosition(
+        function(pos){
+          sendAlert({
+            lat: pos.coords.latitude,
+            lng: pos.coords.longitude
+          });
+        },
+        function(){
+          sendAlert(null);
+        },
+        { timeout: 6000 }
+      );
+    } else {
+      sendAlert(null);
+    }
+  });
+
+  // ---------- Contacts screen navigation ----------
+  openContactsBtn.addEventListener('click', function(){
+    showScreen('contacts');
+    loadContacts();
+  });
+  closeContactsBtn.addEventListener('click', function(){
+    showScreen('home');
+  });
+
+  // ---------- Contacts: load ----------
+  function loadContacts(){
+    fetch('/api/contacts')
+    .then(function(res){
+      if(!res.ok) throw new Error('Failed to load contacts');
+      return res.json();
+    })
+    .then(function(data){
+      state.contacts = Array.isArray(data) ? data : (data.contacts || []);
+      renderContacts();
+    })
+    .catch(function(){
+      showToast('Could not load saved contacts.');
+    });
+  }
+
+  function renderContacts(){
+    contactsList.innerHTML = '';
+    if(!state.contacts || state.contacts.length === 0){
+      var empty = document.createElement('div');
+      empty.className = 'empty-state';
+      empty.textContent = 'No contacts saved yet.';
+      contactsList.appendChild(empty);
+      return;
+    }
+
+    state.contacts.forEach(function(c){
+      var row = document.createElement('div');
+      row.className = 'contact-row';
+
+      var info = document.createElement('div');
+      info.className = 'contact-info';
+      var name = document.createElement('div');
+      name.className = 'name';
+      name.textContent = c.name || 'Unnamed';
+      var meta = document.createElement('div');
+      meta.className = 'meta';
+      meta.textContent = (c.relation ? c.relation + ' · ' : '') + (c.phone || '');
+      info.appendChild(name);
+      info.appendChild(meta);
+
+      var delBtn = document.createElement('button');
+      delBtn.className = 'delete-btn';
+      delBtn.setAttribute('aria-label', 'Delete contact');
+      delBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path><path d="M10 11v6"></path><path d="M14 11v6"></path><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"></path></svg>';
+      delBtn.addEventListener('click', function(){ deleteContact(c.id); });
+
+      row.appendChild(info);
+      row.appendChild(delBtn);
+      contactsList.appendChild(row);
+    });
+  }
+
+  // ---------- Contacts: save ----------
+  saveContactBtn.addEventListener('click', function(){
+    var name = contactName.value.trim();
+    var phone = contactPhone.value.trim();
+    var relation = contactRelation.value.trim();
+
+    if(!name || !phone){
+      showToast('Please enter a name and phone number.');
+      return;
+    }
+
+    saveContactBtn.disabled = true;
+
+    fetch('/api/contacts', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: name, phone: phone, relation: relation })
+    })
+    .then(function(res){
+      if(!res.ok) throw new Error('Failed to save contact');
+      return res.json();
+    })
+    .then(function(){
+      contactName.value = '';
+      contactPhone.value = '';
+      contactRelation.value = '';
+      loadContacts();
+    })
+    .catch(function(){
+      showToast('Could not save contact. Please try again.');
+    })
+    .finally(function(){
+      saveContactBtn.disabled = false;
+    });
+  });
+
+  // ---------- Contacts: delete ----------
+  function deleteContact(id){
+    fetch('/api/contacts/' + encodeURIComponent(id), {
+      method: 'DELETE'
+    })
+    .then(function(res){
+      if(!res.ok) throw new Error('Failed to delete contact');
+      return loadContacts();
+    })
+    .catch(function(){
+      showToast('Could not delete contact. Please try again.');
+    });
+  }
+
+  // ---------- Init ----------
+  refreshAnalyzeState();
+})();
+</script>
+</body>
+  </html>
